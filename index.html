@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0a0a0c">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>USW // AETHER</title>
+    <title>Aether Studio // USW</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,36 +19,43 @@
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <h1>AETHER ACCESS</h1>
-        <input type="text" id="username" placeholder="IDENTITY">
-        <input type="password" id="password" placeholder="PASSWORD">
-        <div class="auth-buttons">
-            <button onclick="handleAuth('login')">LOGIN</button>
-            <button onclick="handleAuth('signup')" class="secondary">SIGN UP</button>
+        <div class="auth-header">
+            <h1>Welcome to Aether</h1>
+            <p class="auth-subtitle">Sign in to access your workspace</p>
         </div>
-        <p id="auth-msg" style="color:#ff4444; font-size:10px; margin-top:10px;"></p>
+        
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Username or Email" autocomplete="off">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+
+        <div class="auth-buttons">
+            <button onclick="handleAuth('login')">Sign In</button>
+            <button onclick="handleAuth('signup')" class="secondary">Create Account</button>
+        </div>
+        <p id="auth-msg" style="color:#ff6b6b; font-size:11px; margin-top:8px; text-align:center; font-family: var(--font-sans); letter-spacing: 0.02em;"></p>
     </div>
 </div>
 
 <header class="aether-nav">
     <div class="nav-left">
         <div class="brand">USW NETWORK</div>
-        <div id="output-stream" class="terminal-mini">Ready.</div>
+        <div id="output-stream" class="terminal-mini">System ready.</div>
     </div>
     <div id="runtime-controls" class="hidden">
-        <button class="action-btn" onclick="runCode()">Run</button>
-        <button class="action-btn" onclick="deployToGithub()">Deploy</button>
+        <button class="action-btn" onclick="runCode()">Run Code</button>
+        <button class="action-btn" onclick="deployToGithub()">Save Changes</button>
         <button class="close-icon" onclick="backToMenu()">✕</button>
     </div>
 </header>
 
 <main id="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-label">ARCHIVED_NODES</div>
+        <div class="sidebar-label">RECENT PROJECTS</div>
         <div id="saved-files-list"></div>
     </aside>
     <div class="list-container">
-        <div class="list-header">NEW_ENVIRONMENTS</div>
+        <div class="list-header">START A NEW WORKSPACE</div>
         <div class="list-item" onclick="launchIDE('html', true)"><span class="title">HTML / CSS</span></div>
         <div class="list-item" onclick="launchIDE('javascript', true)"><span class="title">JavaScript</span></div>
         <div class="list-item" onclick="launchIDE('python', true)"><span class="title">Python 3</span></div>
