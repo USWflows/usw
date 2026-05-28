@@ -2,87 +2,79 @@ let editor, pyodide, activeLang;
 let currentFileId = null;
 let currentUser = null;
 
-// Initialize Session State
+// Check if user is already logged in on page reload
 window.addEventListener('load', () => {
     const savedUser = sessionStorage.getItem('usw_user');
     if (savedUser) {
         currentUser = savedUser;
         document.getElementById('auth-overlay').classList.add('hidden');
-        initWorkspace();
-    }
-    
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./server.js', { scope: './' })
-            .then(() => logTerminal("SYSTEM", "Aether Secure Kernel Online."))
-            .catch(err => logTerminal("ERROR", "Kernel registration failed: " + err));
+        showDashboard();
     }
 });
 
-// Bootstrap Monaco Code Canvas
+// Setup the main Code Editor
 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
 require(['vs/editor/editor.main'], function() {
     editor = monaco.editor.create(document.getElementById('monaco-canvas'), {
         theme: 'vs-dark',
         automaticLayout: true,
-        fontSize: 15,
-        fontFamily: "'JetBrains Mono', monospace",
-        minimap: { enabled: false },
-        lineHeight: 24,
-        padding: { top: 20 },
-        background: "#000000"
+        fontSize: 14,
+        minimap: { enabled: false }
     });
 });
 
-// Auth Portal Router
+// Controls Sign-in and Registration
 function handleAuth(type) {
     const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value;
     const msg = document.getElementById('auth-msg');
 
     if (!u || !p) {
-        msg.innerText = "CREDENTIAL PARAMETERS REQUIRED.";
+        msg.innerText = "Please enter both a username and password.";
         return;
     }
 
     if (type === 'signup') {
         if (USW_DATA.saveUser(u, p)) {
             msg.style.color = "#00ffaa";
-            msg.innerText = "ACCESS ID CREATED. LOGGING IN...";
+            msg.innerText = "Account created! Logging you in...";
             setTimeout(() => handleAuth('login'), 800);
         } else {
-            msg.innerText = "IDENTITY MATRIX CHOSEN OR UNAVAILABLE.";
+            msg.innerText = "That username is already taken.";
         }
     } else {
         if (USW_DATA.verifyUser(u, p)) {
             currentUser = u;
             sessionStorage.setItem('usw_user', u);
             document.getElementById('auth-overlay').classList.add('hidden');
-            initWorkspace();
+            showDashboard();
         } else {
-            msg.innerText = "ACCESS DENIED. ID PASSWORD INVALID.";
+            msg.innerText = "Wrong username or password.";
         }
     }
 }
 
-function initWorkspace() {
-    updateSidebar();
-    logTerminal("SYSTEM", `Active workspace environment loaded for node: ${currentUser}`);
+function showDashboard() {
+    updateSidebarList();
+    document.getElementById('welcome-tag').innerText = `Logged in as: ${currentUser}`;
 }
 
+// Prompts user to name a new file and creates it
 function createNewFile(lang) {
-    const name = prompt(`Enter system label name for your ${lang.toUpperCase()} environment:`, `source_${Date.now().toString().slice(-4)}`);
+    const name = prompt(`Name your new ${lang.toUpperCase()} file:`, "untitled");
     if (!name) return;
 
-    const fileExt = lang === 'python' ? 'py' : (lang === 'javascript' ? 'js' : 'html');
-    const fullFilename = `${name}.${fileExt}`;
-    const defaultCode = USW_CONFIG.TEMPLATES[lang] || "";
+    const ext = lang === 'python' ? 'py' : (lang === 'javascript' ? 'js' : 'html');
+    const fullTitle = `${name}.${ext}`;
+    const startingCode = USW_CONFIG.TEMPLATES[lang] || "";
 
-    const newId = USW_DATA.createFile(currentUser, fullFilename, lang, defaultCode);
-    updateSidebar();
-    launchIDE(newId);
+    const newId = USW_DATA.createFile(currentUser, fullTitle, lang, startingCode);
+    updateSidebarList();
+    openEditor(newId);
 }
 
-async function launchIDE(fileId) {
+// Opens a file into the code editor
+async function openEditor(fileId) {
     const file = USW_DATA.getFile(currentUser, fileId);
     if (!file) return;
 
@@ -93,35 +85,35 @@ async function launchIDE(fileId) {
     document.getElementById('editor-stage').classList.remove('hidden');
     document.getElementById('runtime-controls').classList.remove('hidden');
     
-    // Handle Monaco Language Mapping
+    // Set text editor syntax language highlight
     const mode = activeLang === 'html' ? 'html' : (activeLang === 'javascript' ? 'javascript' : 'python');
     monaco.editor.setModelLanguage(editor.getModel(), mode);
     editor.setValue(file.code);
 
-    // Boot Python if needed
+    // If it's Python, load the compiler engine in the background
     if (activeLang === 'python' && !pyodide) {
-        logTerminal("PYODIDE", "Compiling local WebAssembly VM environment...");
+        printToConsole("System", "Loading Python engine... Please wait.");
         try {
             pyodide = await loadPyodide();
-            logTerminal("PYODIDE", "Python environment fully mounted via WebAssembly.");
+            printToConsole("System", "Python loaded successfully! Ready to run.");
         } catch (err) {
-            logTerminal("ERROR", "Python engine failed to load: " + err.message);
+            printToConsole("Error", "Could not load Python: " + err.message);
         }
     }
 }
 
-// Multi-Language Code Compilation Engine
+// The Run Button Engine
 async function runCode() {
     if (!currentFileId) return;
     const code = editor.getValue();
     
-    // Auto-save changes dynamically
+    // Auto-save changes right before running
     USW_DATA.updateFileCode(currentUser, currentFileId, code);
-    logTerminal("RUNTIME", `Executing pipeline stream...`);
+    printToConsole("System", "Running code...");
     
     try {
         if (activeLang === 'python') {
-            if (!pyodide) { logTerminal("ERROR", "Python WASM is still warming up. Wait a second."); return; }
+            if (!pyodide) { printToConsole("Error", "Python is still loading."); return; }
             await pyodide.runPythonAsync(`
 import sys, io
 sys.stdout = io.StringIO()
@@ -131,105 +123,88 @@ sys.stderr = io.StringIO()
             const stdout = pyodide.runPython("sys.stdout.getvalue()");
             const stderr = pyodide.runPython("sys.stderr.getvalue()");
             
-            if (stdout) logTerminal("STDOUT", stdout.trim());
-            if (stderr) logTerminal("STDERR", stderr.trim());
-            if (!stdout && !stderr) logTerminal("SUCCESS", "Process completed with code 0.");
+            if (stdout) printToConsole("Output", stdout.trim());
+            if (stderr) printToConsole("Error", stderr.trim());
+            if (!stdout && !stderr) printToConsole("System", "Finished running with zero errors.");
         } 
         else if (activeLang === 'javascript') {
-            const dynamicLogs = [];
-            const customConsole = {
-                log: (...args) => dynamicLogs.push(args.join(' ')),
-                error: (...args) => dynamicLogs.push("ERR: " + args.join(' ')),
-                warn: (...args) => dynamicLogs.push("WARN: " + args.join(' '))
+            const logs = [];
+            const fakeConsole = {
+                log: (...args) => logs.push(args.join(' ')),
+                error: (...args) => logs.push("ERROR: " + args.join(' ')),
+                warn: (...args) => logs.push("WARN: " + args.join(' '))
             };
-            const interceptedWorker = new Function('console', code);
-            interceptedWorker(customConsole);
-            logTerminal("JS-CONSOLE", dynamicLogs.length ? dynamicLogs.join('\n') : "Script ran without printing outputs.");
+            const executeJS = new Function('console', code);
+            executeJS(fakeConsole);
+            printToConsole("Console", logs.length ? logs.join('\n') : "Code executed successfully. (Nothing was printed)");
         } 
         else if (activeLang === 'html') {
-            const previewWindow = window.open();
-            if (previewWindow) {
-                previewWindow.document.open();
-                previewWindow.document.write(code);
-                previewWindow.document.close();
-                logTerminal("DOM", "Static site frame rendered into a new browser window.");
+            const newTab = window.open();
+            if (newTab) {
+                newTab.document.open();
+                newTab.document.write(code);
+                newTab.document.close();
+                printToConsole("System", "Opened website layout inside a new tab page window preview.");
             } else {
-                logTerminal("ERROR", "Pop-up blocker intercepted preview window rendering.");
+                printToConsole("Error", "Popup blocked! Allow popups to see your website preview.");
             }
         }
     } catch (e) {
-        logTerminal("EXEC-ERROR", e.message);
+        printToConsole("Crash Error", e.message);
     }
 }
 
-// Manifest Staging Configuration Output
-function deployToGithub() {
-    if (!currentFileId) return;
-    const code = editor.getValue();
-    USW_DATA.updateFileCode(currentUser, currentFileId, code);
-    
-    const file = USW_DATA.getFile(currentUser, currentFileId);
-    logTerminal("DEPLOY", "Packaging current workspace environment file...");
-    
-    const exportBundle = {
-        deploymentId: crypto.randomUUID(),
-        node: USW_CONFIG.APP_NAME,
-        author: currentUser,
-        filename: file.filename,
-        payload: btoa(code)
-    };
-    
-    navigator.clipboard.writeText(JSON.stringify(exportBundle, null, 2))
-        .then(() => logTerminal("DEPLOY", "Data package compiled! Payload architecture structure added to your clipboard."))
-        .catch(() => logTerminal("DEPLOY", `Export generated internally for target name: ${file.filename}`));
+function printToConsole(label, text) {
+    const box = document.getElementById('console-box');
+    if (!box) return;
+    box.value += `[${label}] ${text}\n`;
+    box.scrollTop = box.scrollHeight;
 }
 
-function logTerminal(channel, text) {
-    const logBox = document.getElementById('terminal-log-stream');
-    if (!logBox) return;
-    const timestamp = new Date().toLocaleTimeString();
-    logBox.value += `[${timestamp}] [${channel}] » ${text}\n`;
-    logBox.scrollTop = logBox.scrollHeight;
-}
-
-function updateSidebar() {
-    const container = document.getElementById('saved-files-list');
-    container.innerHTML = "";
+// Updates list of files on dashboard home
+function updateSidebarList() {
+    const listArea = document.getElementById('saved-files-list');
+    listArea.innerHTML = "";
     
-    const workspaceFiles = USW_DATA.getAllUserFiles(currentUser);
+    const files = USW_DATA.getAllUserFiles(currentUser);
     
-    if (workspaceFiles.length === 0) {
-        container.innerHTML = `<div class="empty-vfs">Workspace is completely clear.</div>`;
+    if (files.length === 0) {
+        listArea.innerHTML = `<div style="color:#777; text-align:center; margin-top:20px;">No files created yet.</div>`;
         return;
     }
 
-    workspaceFiles.forEach(file => {
+    files.forEach(file => {
         const row = document.createElement('div');
-        row.className = 'saved-item';
+        row.className = 'file-list-row';
         
-        const label = document.createElement('span');
-        label.innerText = `⚙️ ${file.filename}`;
-        label.onclick = () => launchIDE(file.id);
+        const nameSpan = document.createElement('span');
+        nameSpan.innerText = file.filename;
+        nameSpan.style.flexGrow = "1";
+        nameSpan.onclick = () => openEditor(file.id);
         
-        const delBtn = document.createElement('button');
-        delBtn.className = 'delete-file-btn';
-        delBtn.innerText = "✕";
-        delBtn.onclick = (e) => {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerText = "Delete";
+        deleteBtn.style.background = "#ff4444";
+        deleteBtn.style.color = "white";
+        deleteBtn.style.border = "none";
+        deleteBtn.style.padding = "4px 8px";
+        deleteBtn.style.cursor = "pointer";
+        deleteBtn.onclick = (e) => {
             e.stopPropagation();
-            if(confirm(`Completely delete code stream file: ${file.filename}?`)) {
+            if(confirm(`Delete ${file.filename} permanently?`)) {
                 USW_DATA.deleteFile(currentUser, file.id);
-                if (currentFileId === file.id) backToMenu();
-                else updateSidebar();
+                if (currentFileId === file.id) exitEditor();
+                else updateSidebarList();
             }
         };
 
-        row.appendChild(label);
-        row.appendChild(delBtn);
-        container.appendChild(row);
+        row.appendChild(nameSpan);
+        row.appendChild(deleteBtn);
+        listArea.appendChild(row);
     });
 }
 
-function backToMenu() {
+function exitEditor() {
     if (currentFileId) {
         USW_DATA.updateFileCode(currentUser, currentFileId, editor.getValue());
     }
@@ -237,5 +212,5 @@ function backToMenu() {
     document.getElementById('editor-stage').classList.add('hidden');
     document.getElementById('runtime-controls').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
-    updateSidebar();
+    updateSidebarList();
 }
