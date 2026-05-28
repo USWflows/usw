@@ -2,16 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>USW // CLOUD CORE</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon-512.png">
-    <link rel="apple-touch-icon" href="icon-512.png">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USW Code Studio</title>
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,58 +11,57 @@
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <h1>USW ACCESS IDENTIFICATION</h1>
-        <input type="text" id="username" placeholder="OPERATOR KEY NAME" autocomplete="off">
-        <input type="password" id="password" placeholder="SECURE KEY PHRASE">
-        <div class="auth-buttons">
-            <button onclick="handleAuth('login')">INITIALIZE PROTOCOL</button>
-            <button onclick="handleAuth('signup')" class="secondary">CREATE NEW LOGIN MATRIX</button>
+        <h2>USW Code Studio Login</h2>
+        <input type="text" id="username" placeholder="Username" autocomplete="off">
+        <input type="password" id="password" placeholder="Password">
+        <div style="display: flex; gap: 10px; margin-top:15px;">
+            <button style="flex:1;" onclick="handleAuth('login')">Log In</button>
+            <button style="flex:1; background:#555;" onclick="handleAuth('signup')">Sign Up</button>
         </div>
-        <p id="auth-msg"></p>
+        <p id="auth-msg" style="color:red; margin-top:10px; font-size:13px;"></p>
     </div>
 </div>
 
-<header class="aether-nav">
-    <div class="nav-left">
-        <div class="brand">USW ENGINE CONTROL</div>
-    </div>
+<header class="navbar">
+    <div class="logo">USW Code Studio</div>
+    <div id="welcome-tag" style="color:#aaa; font-size:14px; margin-right:20px;"></div>
     <div id="runtime-controls" class="hidden">
-        <button class="action-btn execution-accent" onclick="runCode()">⚡ Compile Code</button>
-        <button class="action-btn" onclick="deployToGithub()">📦 Export Bundle</button>
-        <button class="close-icon" onclick="backToMenu()">✕</button>
+        <button onclick="runCode()" style="background:#00ffaa; color:black;">▶ Run Code</button>
+        <button onclick="exitEditor()" style="background:#ff4444; color:white;">Close File ✕</button>
     </div>
 </header>
 
 <main id="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-label">VIRTUAL_FILES_EXPLORER</div>
+        <h3>My Saved Files</h3>
         <div id="saved-files-list"></div>
     </aside>
-    <div class="list-container">
-        <div class="list-header">INITIALIZE_NEW_ENVIRONMENTS</div>
-        <div class="list-grid">
-            <div class="list-item" onclick="createNewFile('html')">
-                <span class="title">&lt;/&gt; Interactive HTML Engine</span>
-                <span class="subtitle">Launches front-end markup code layouts inside live windows.</span>
+    
+    <div class="main-content">
+        <h3>Create a New Project File</h3>
+        <div class="creation-grid">
+            <div class="create-card" onclick="createNewFile('html')">
+                <h4>HTML Website</h4>
+                <p>Build frontend layouts and view previews in a fresh window browser tab.</p>
             </div>
-            <div class="list-item" onclick="createNewFile('javascript')">
-                <span class="title">JS Isolated Node Layer</span>
-                <span class="subtitle">Executes JavaScript engines directly tracking console outputs.</span>
+            <div class="create-card" onclick="createNewFile('javascript')">
+                <h4>JavaScript Script</h4>
+                <p>Write functional code logic and view print logging outputs right in the console.</p>
             </div>
-            <div class="list-item" onclick="createNewFile('python')">
-                <span class="title">PY WebAssembly Virtual Kernel</span>
-                <span class="subtitle">Runs native Python 3 programs in browser memory stacks.</span>
+            <div class="create-card" onclick="createNewFile('python')">
+                <h4>Python 3 Program</h4>
+                <p>Run native backend python programs cleanly directly inside the web browser framework.</p>
             </div>
         </div>
     </div>
 </main>
 
 <div id="editor-stage" class="hidden">
-    <div id="editor-workspace-split">
+    <div class="editor-split-layout">
         <div id="monaco-canvas"></div>
-        <div id="terminal-pane">
-            <div class="terminal-pane-header">INTEGRATED_CONSOLE_BUFFER</div>
-            <textarea id="terminal-log-stream" readonly placeholder="Runtime telemetry tracking outputs appear here..."></textarea>
+        <div class="console-pane">
+            <div class="console-header">Console Run Output Log</div>
+            <textarea id="console-box" readonly placeholder="Output logs appear here after clicking Run..."></textarea>
         </div>
     </div>
 </div>
