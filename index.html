@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>USW // AETHER</title>
+    <title>USW // CLOUD CORE</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
@@ -19,46 +19,63 @@
 
 <div id="auth-overlay">
     <div class="auth-card">
-        <h1>AETHER ACCESS</h1>
-        <input type="text" id="username" placeholder="IDENTITY">
-        <input type="password" id="password" placeholder="PASSWORD">
+        <h1>USW ACCESS IDENTIFICATION</h1>
+        <input type="text" id="username" placeholder="OPERATOR KEY NAME" autocomplete="off">
+        <input type="password" id="password" placeholder="SECURE KEY PHRASE">
         <div class="auth-buttons">
-            <button onclick="handleAuth('login')">LOGIN</button>
-            <button onclick="handleAuth('signup')" class="secondary">SIGN UP</button>
+            <button onclick="handleAuth('login')">INITIALIZE PROTOCOL</button>
+            <button onclick="handleAuth('signup')" class="secondary">CREATE NEW LOGIN MATRIX</button>
         </div>
-        <p id="auth-msg" style="color:#ff4444; font-size:10px; margin-top:10px;"></p>
+        <p id="auth-msg"></p>
     </div>
 </div>
 
 <header class="aether-nav">
     <div class="nav-left">
-        <div class="brand">USW NETWORK</div>
-        <div id="output-stream" class="terminal-mini">Ready.</div>
+        <div class="brand">USW ENGINE CONTROL</div>
     </div>
     <div id="runtime-controls" class="hidden">
-        <button class="action-btn" onclick="runCode()">Run</button>
-        <button class="action-btn" onclick="deployToGithub()">Deploy</button>
+        <button class="action-btn execution-accent" onclick="runCode()">⚡ Compile Code</button>
+        <button class="action-btn" onclick="deployToGithub()">📦 Export Bundle</button>
         <button class="close-icon" onclick="backToMenu()">✕</button>
     </div>
 </header>
 
 <main id="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-label">ARCHIVED_NODES</div>
+        <div class="sidebar-label">VIRTUAL_FILES_EXPLORER</div>
         <div id="saved-files-list"></div>
     </aside>
     <div class="list-container">
-        <div class="list-header">NEW_ENVIRONMENTS</div>
-        <div class="list-item" onclick="launchIDE('html', true)"><span class="title">HTML / CSS</span></div>
-        <div class="list-item" onclick="launchIDE('javascript', true)"><span class="title">JavaScript</span></div>
-        <div class="list-item" onclick="launchIDE('python', true)"><span class="title">Python 3</span></div>
+        <div class="list-header">INITIALIZE_NEW_ENVIRONMENTS</div>
+        <div class="list-grid">
+            <div class="list-item" onclick="createNewFile('html')">
+                <span class="title">&lt;/&gt; Interactive HTML Engine</span>
+                <span class="subtitle">Launches front-end markup code layouts inside live windows.</span>
+            </div>
+            <div class="list-item" onclick="createNewFile('javascript')">
+                <span class="title">JS Isolated Node Layer</span>
+                <span class="subtitle">Executes JavaScript engines directly tracking console outputs.</span>
+            </div>
+            <div class="list-item" onclick="createNewFile('python')">
+                <span class="title">PY WebAssembly Virtual Kernel</span>
+                <span class="subtitle">Runs native Python 3 programs in browser memory stacks.</span>
+            </div>
+        </div>
     </div>
 </main>
 
 <div id="editor-stage" class="hidden">
-    <div id="monaco-canvas"></div>
+    <div id="editor-workspace-split">
+        <div id="monaco-canvas"></div>
+        <div id="terminal-pane">
+            <div class="terminal-pane-header">INTEGRATED_CONSOLE_BUFFER</div>
+            <textarea id="terminal-log-stream" readonly placeholder="Runtime telemetry tracking outputs appear here..."></textarea>
+        </div>
+    </div>
 </div>
 
+<script src="config.js"></script>
 <script src="storage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
