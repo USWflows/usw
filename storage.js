@@ -1,70 +1,69 @@
 const USW_DATA = {
-    // Registers a new user matrix
+    // Saves a new user name and password
     saveUser: (user, pass) => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        if (u[user]) return false;
-        u[user] = { pass: pass, files: {} };
-        localStorage.setItem('usw_users', JSON.stringify(u));
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        if (database[user]) return false; // Username already taken
+        database[user] = { pass: pass, files: {} };
+        localStorage.setItem('usw_users', JSON.stringify(database));
         return true;
     },
     
-    // Validates credentials on login
+    // Verifies password when logging back in
     verifyUser: (user, pass) => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        return u[user] && u[user].pass === pass;
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        return database[user] && database[user].pass === pass;
     },
 
-    // Instantiates an entirely new file in the user's VFS
+    // Adds a brand new file to the user's account
     createFile: (user, filename, lang, defaultCode = "") => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        if (!u[user]) return null;
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        if (!database[user]) return null;
+        if (!database[user].files) database[user].files = {};
 
-        const uniqueId = 'vfs_' + Math.random().toString(36).substring(2, 11);
-        u[user].files[uniqueId] = {
-            id: uniqueId,
+        const fileId = 'id_' + Math.random().toString(36).substring(2, 11);
+        database[user].files[fileId] = {
+            id: fileId,
             filename: filename,
             lang: lang,
-            code: defaultCode,
-            timestamp: Date.now()
+            code: defaultCode
         };
         
-        localStorage.setItem('usw_users', JSON.stringify(u));
-        return uniqueId;
+        localStorage.setItem('usw_users', JSON.stringify(database));
+        return fileId;
     },
 
-    // Fetches a specific file asset
+    // Fetches a saved file to open in the editor
     getFile: (user, fileId) => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        return u[user]?.files?.[fileId] || null;
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        return database[user]?.files?.[fileId] || null;
     },
 
-    // Saves current editor state into permanent local memory
+    // Saves code changes automatically
     updateFileCode: (user, fileId, code) => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        if (u[user] && u[user].files?.[fileId]) {
-            u[user].files[fileId].code = code;
-            u[user].files[fileId].timestamp = Date.now();
-            localStorage.setItem('usw_users', JSON.stringify(u));
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        if (database[user] && database[user].files?.[fileId]) {
+            database[user].files[fileId].code = code;
+            localStorage.setItem('usw_users', JSON.stringify(database));
             return true;
         }
         return false;
     },
 
-    // Purges a code stream asset permanently
+    // Deletes a file completely
     deleteFile: (user, fileId) => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        if (u[user] && u[user].files?.[fileId]) {
-            delete u[user].files[fileId];
-            localStorage.setItem('usw_users', JSON.stringify(u));
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        if (database[user] && database[user].files?.[fileId]) {
+            delete database[user].files[fileId];
+            localStorage.setItem('usw_users', JSON.stringify(database));
             return true;
         }
         return false;
     },
 
-    // Gathers all stored documents for the user dashboard list
+    // Loads all files belonging to the logged-in user
     getAllUserFiles: (user) => {
-        let u = JSON.parse(localStorage.getItem('usw_users') || '{}');
-        if (!u[user] || !u[user].files) return [];
-        return Object.values(u[user].files).sort((a, b) => b.timestamp - a.timestamp);
+        let database = JSON.parse(localStorage.getItem('usw_users') || '{}');
+        if (!database[user] || !database[user].files) return [];
+        return Object.values(database[user].files);
     }
 };
