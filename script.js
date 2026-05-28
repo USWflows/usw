@@ -52,7 +52,7 @@ function handleAuth(type) {
     }
 }
 
-async function launchIDE(lang, isNew) {
+async function launchIDE(lang, isNew, fileId = null) {
     activeLang = lang;
     document.getElementById('dashboard').classList.add('hidden');
     document.getElementById('editor-stage').classList.remove('hidden');
@@ -64,8 +64,13 @@ async function launchIDE(lang, isNew) {
     if (isNew) {
         editor.setValue("");
         currentFileId = null; // Fresh workspace session
+    } else if (fileId) {
+        // Direct open from the nested files inside the sidebar tree
+        currentFileId = fileId;
+        const fileRecord = USW_DATA.getFile(currentUser, fileId);
+        if (fileRecord) editor.setValue(fileRecord.code || "");
     } else {
-        // Fallback safety to locate an existing file if parsing raw history
+        // Fallback safety to locate an existing file if clicking text links
         const userFiles = USW_DATA.getAllUserFiles(currentUser);
         const match = userFiles.find(f => f.lang === lang);
         if (match) {
@@ -117,17 +122,56 @@ function updateSidebar() {
         return;
     }
 
+    // Grouping our files by workspace profiles (HTML, JavaScript, Python)
+    const groups = {
+        'html': { title: '🗁 HTML / CSS Workspace', files: [] },
+        'javascript': { title: '🗁 JS Workspace', files: [] },
+        'python': { title: '🗁 Python 3 Workspace', files: [] }
+    };
+
     userFiles.forEach(file => {
-        const div = document.createElement('div');
-        div.className = 'saved-item';
-        div.innerText = file.filename;
-        div.onclick = () => {
-            launchIDE(file.lang, false);
-            currentFileId = file.id;
-            const fileRecord = USW_DATA.getFile(currentUser, file.id);
-            if (fileRecord) editor.setValue(fileRecord.code);
+        if (groups[file.lang]) {
+            groups[file.lang].files.push(file);
+        }
+    });
+
+    // Generate nested folder project entries inside your recent files view
+    Object.keys(groups).forEach(key => {
+        const group = groups[key];
+        if (group.files.length === 0) return;
+
+        // Parent Project Container Folder
+        const groupFolder = document.createElement('div');
+        groupFolder.style.marginBottom = "0.75rem";
+        
+        const folderHeader = document.createElement('div');
+        folderHeader.style.cssText = "font-size: 0.8rem; font-weight: 500; color: #e2e8f0; padding: 0.4rem 0.5rem; cursor: pointer; border-radius: 4px; transition: background 0.2s;";
+        folderHeader.innerText = group.title;
+        folderHeader.onclick = () => {
+            const contents = folderHeader.nextElementSibling;
+            contents.style.display = contents.style.display === 'none' ? 'block' : 'none';
         };
-        list.appendChild(div);
+
+        // File List Wrap Component
+        const folderContents = document.createElement('div');
+        folderContents.style.paddingLeft = "1rem";
+        folderContents.style.marginTop = "0.25rem";
+
+        group.files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'saved-item';
+            fileItem.style.cssText = "font-size: 0.75rem; padding: 0.4rem 0.6rem; color: #626a7a; border-left: 1px solid rgba(255,255,255,0.05); margin-bottom: 2px;";
+            fileItem.innerText = `📄 ${file.filename}`;
+            fileItem.onclick = (e) => {
+                e.stopPropagation();
+                launchIDE(file.lang, false, file.id);
+            };
+            folderContents.appendChild(fileItem);
+        });
+
+        groupFolder.appendChild(folderHeader);
+        groupFolder.appendChild(folderContents);
+        list.appendChild(groupFolder);
     });
 }
 
@@ -148,7 +192,8 @@ function deployToGithub() {
         USW_DATA.updateFileCode(currentUser, currentFileId, codeContent);
     } else {
         // Creates a fresh entry, capturing the brand new ID returned from storage.js
-        const projectTitle = `project_${activeLang}.src`;
+        const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const projectTitle = `script_${timestamp.replace(' ','').toLowerCase()}.${activeLang === 'html' ? 'html' : activeLang === 'javascript' ? 'js' : 'py'}`;
         currentFileId = USW_DATA.createFile(currentUser, projectTitle, activeLang, codeContent);
     }
     
