@@ -1,8 +1,8 @@
-/* --- USW SYSTEM DESIGN KERNEL v12.0 --- */
+/* --- USW SYSTEM GENERAL DESIGN KERNEL v12.5 --- */
 :root {
     --bg-base: #050507;
     --bg-surface: rgba(16, 16, 24, 0.55);
-    --bg-surface-elevated: rgba(26, 26, 36, 0.8);
+    --bg-surface-elevated: rgba(26, 26, 36, 0.82);
     --border-subtle: rgba(255, 255, 255, 0.04);
     --border-glow: rgba(57, 227, 147, 0.15);
     --accent: #39e393;
@@ -35,7 +35,7 @@ body {
     flex-direction: column;
 }
 
-/* --- INTEGRATED CONTROL DECK NAVIGATION --- */
+/* --- SYSTEM CONTROL DECK INTEGRATED HEADER NAVIGATION --- */
 .aether-nav {
     height: 56px;
     background: linear-gradient(to bottom, #09090c, var(--bg-base));
@@ -69,7 +69,7 @@ body {
     padding: 0.35rem 0.85rem;
     border-radius: 6px;
     border: 1px solid rgba(57, 227, 147, 0.08);
-    max-width: 400px;
+    max-width: 420px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -128,7 +128,7 @@ body {
 
 .close-icon:hover { color: #ff6b6b; }
 
-/* --- CORE FRAME SYSTEM SPLITS --- */
+/* --- ARCHITECTURE WORKSPACE SECTION LAYOUT TRACK --- */
 #dashboard {
     flex: 1;
     display: flex;
@@ -158,7 +158,7 @@ body {
     overflow-y: auto;
 }
 
-/* --- DIRECTORY FOLDERS & DYNAMIC HOVER CONTROLS --- */
+/* --- DIRECTORY FOLDERS BRANCH MAPS & INTERACTIONS --- */
 .folder-group { margin-bottom: 1rem; }
 
 .folder-header {
@@ -214,7 +214,7 @@ body {
 .saved-item:hover .delete-node-btn { opacity: 1; }
 .saved-item .delete-node-btn:hover { color: #ff6b6b; }
 
-/* --- RUNTIME ENGINE GRID CHASSIS --- */
+/* --- MAIN WORKSPACE INTERACTIVE PLATFORM CONSOLE GRID --- */
 .list-container {
     flex: 1;
     padding: 3rem;
@@ -286,7 +286,7 @@ body {
     line-height: 1.6;
 }
 
-/* --- MONACO STUDIO SCREEN GRID --- */
+/* --- MONACO CANVAS STUDIO CONTAIMENT TRACK --- */
 #editor-stage {
     flex: 1;
     display: flex;
@@ -299,7 +299,7 @@ body {
     height: 100%;
 }
 
-/* --- THE CRYPTO AUTH LAYER VISUALS --- */
+/* --- ZERO KNOWLEDGE CYPHER GATE AUTHENTICATION CARDS --- */
 #auth-overlay {
     position: fixed;
     inset: 0;
@@ -401,9 +401,10 @@ body {
     text-align: center;
     min-height: 18px;
     font-family: var(--font-sans);
+    line-height: 1.4;
 }
 
-/* Webkit Scrollbar Engineering overrides */
+/* Custom Scrollbar Engineering overrides */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
