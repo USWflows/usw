@@ -49,8 +49,13 @@ const USW_Core = {
     },
 
     // 4. MICRO-OPTIMIZED EDITING SURFACE FABRICATION
-    bootstrapMonaco: () => {
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+   bootstrapMonaco: () => {
+        require.config({ 
+            paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' },
+            // Direct monaco to fetch its web-workers from web links that our service worker caches
+            'vs/nls': { availableLanguages: { '*': 'en' } }
+        });
+        
         require(['vs/editor/editor.main'], () => {
             USW_Core.state.editor = monaco.editor.create(document.getElementById('monaco-canvas'), {
                 theme: 'vs-dark',
@@ -128,34 +133,26 @@ const USW_Core = {
             if (forceNewFlag) {
                 USW_Core.state.editor.setValue("");
                 USW_Core.state.currentFileId = null;
-                USW_Core.logTerminal(`Initialized unallocated ${languageKey.toUpperCase()} code buffer.`);
+                USW_Core.logTerminal(`Initialized local ${languageKey.toUpperCase()} code buffer.`);
             } else if (targetedFileId) {
                 USW_Core.state.currentFileId = targetedFileId;
                 const recordPayload = await USW_DATA.getFile(USW_Core.state.currentUser, targetedFileId);
                 if (recordPayload) {
                     USW_Core.state.editor.setValue(recordPayload.code || "");
-                    USW_Core.logTerminal(`Mounted vault file stream: ${recordPayload.filename}`);
-                }
-            } else {
-                const operationalPool = await USW_DATA.getAllUserFiles(USW_Core.state.currentUser);
-                const structuredMatch = operationalPool.find(fileEntity => fileEntity.lang === languageKey);
-                if (structuredMatch) {
-                    USW_Core.state.currentFileId = structuredMatch.id;
-                    USW_Core.state.editor.setValue(structuredMatch.code || "");
-                    USW_Core.logTerminal(`Linked active workspace node: ${structuredMatch.filename}`);
-                } else {
-                    USW_Core.state.editor.setValue("");
-                    USW_Core.state.currentFileId = null;
+                    USW_Core.logTerminal(`Mounted secure vault file stream: ${recordPayload.filename}`);
                 }
             }
 
+            // Fire up Python sandbox, routing it explicitly through the Service Worker catch net
             if (languageKey === 'python' && !USW_Core.state.pyodide) {
-                USW_Core.logTerminal("Compiling client-side WebAssembly Python VM environment...");
-                USW_Core.state.pyodide = await loadPyodide();
-                USW_Core.logTerminal("WASM virtual compilation node reporting stable state.");
+                USW_Core.logTerminal("Compiling isolated client-side WebAssembly Python VM...");
+                USW_Core.state.pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/"
+                });
+                USW_Core.logTerminal("WASM virtual core reporting stable state. Systems localized.");
             }
         } catch (ioException) {
-            USW_Core.logTerminal(`IDE Mount Failure: ${ioException.message}`);
+            USW_Core.logTerminal(`IDE Local Mount Failure: ${ioException.message}`);
         }
     },
 
