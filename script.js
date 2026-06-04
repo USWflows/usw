@@ -1,13 +1,16 @@
 let editor, pyodide, activeLang, currentUser = null;
-let currentFileId = null; // Dynamically links editor instances to storage IDs
+let currentFileId = null; // Tracks current file entity state bindings
 
 // SERVICE WORKER & SESSION INIT
 window.addEventListener('load', () => {
+    // Note: session storage here only persists username tracking, never passwords or raw file assets.
     const savedUser = sessionStorage.getItem('usw_user');
     if (savedUser) {
         currentUser = savedUser;
         document.getElementById('auth-overlay').classList.add('hidden');
-        updateSidebar();
+        // Let the app context know we need authorization keys mapped if coming from cold load
+        document.getElementById('auth-msg').innerText = "Session expired. Please re-authenticate.";
+        document.getElementById('auth-overlay').classList.remove('hidden');
     }
     
     if ('serviceWorker' in navigator) {
@@ -23,38 +26,37 @@ require(['vs/editor/editor.main'], function() {
     editor = monaco.editor.create(document.getElementById('monaco-canvas'), {
         theme: 'vs-dark', automaticLayout: true, fontSize: 16, 
         fontFamily: "'JetBrains Mono'", minimap: { enabled: false },
-        backgroundColor: "#0a0a0c" // Deep tint to match your new workspace theme
+        backgroundColor: "#0a0a0c"
     });
 });
 
-// Mark the function as async so it can wait for the cryptographic hashing
-async function handleAuth(type) { // 
-    const u = document.getElementById('username').value; // 
-    const p = document.getElementById('password').value; // 
-    const msg = document.getElementById('auth-msg'); // 
+// Upgraded async auth gateway to absorb the non-blocking cryptographic verification pass
+async function handleAuth(type) { 
+    const u = document.getElementById('username').value; 
+    const p = document.getElementById('password').value; 
+    const msg = document.getElementById('auth-msg'); 
     
     if (type === 'signup') {
-        // Added 'await' here
-        if (await USW_DATA.saveUser(u, p)) { // 
-            msg.style.color = "#39e393"; // 
-            msg.innerText = "Account created successfully! Please sign in."; // 
+        if (await USW_DATA.saveUser(u, p)) { 
+            msg.style.color = "#39e393"; 
+            msg.innerText = "Secure Vault created successfully! Please sign in."; 
         } else {
-            msg.style.color = "#ff6b6b"; // 
-            msg.innerText = "This username is already taken."; // 
+            msg.style.color = "#ff6b6b"; 
+            msg.innerText = "This username is already taken."; 
         }
     } else {
-        // Added 'await' here
-        if (await USW_DATA.verifyUser(u, p)) { // 
-            currentUser = u; // 
-            sessionStorage.setItem('usw_user', u); // 
-            document.getElementById('auth-overlay').classList.add('hidden'); // 
-            updateSidebar(); // 
+        if (await USW_DATA.verifyUser(u, p)) { 
+            currentUser = u; 
+            sessionStorage.setItem('usw_user', u); 
+            document.getElementById('auth-overlay').classList.add('hidden'); 
+            await updateSidebar(); 
         } else {
-            msg.style.color = "#ff6b6b"; // 
-            msg.innerText = "Incorrect username or password."; // 
+            msg.style.color = "#ff6b6b"; 
+            msg.innerText = "Decryption failure. Incorrect credentials.";
         }
     }
 }
+
 async function launchIDE(lang, isNew, fileId = null) {
     activeLang = lang;
     document.getElementById('dashboard').classList.add('hidden');
@@ -66,18 +68,15 @@ async function launchIDE(lang, isNew, fileId = null) {
 
     if (isNew) {
         editor.setValue("");
-        currentFileId = null; // Fresh workspace session
+        currentFileId = null; 
     } else if (fileId) {
-        // Direct open from the nested files inside the sidebar tree
         currentFileId = fileId;
-        const fileRecord = USW_DATA.getFile(currentUser, fileId);
+        const fileRecord = await USW_DATA.getFile(currentUser, fileId);
         if (fileRecord) editor.setValue(fileRecord.code || "");
     } else {
-        // Fallback safety to locate an existing file if clicking text links
-        const userFiles = USW_DATA.getAllUserFiles(currentUser);
+        const userFiles = await USW_DATA.getAllUserFiles(currentUser);
         const match = userFiles.find(f => f.lang === lang);
         if (match) {
-            // FIX: Ensure this state is properly tracked globally
             currentFileId = match.id; 
             editor.setValue(match.code || "");
         } else {
@@ -114,23 +113,21 @@ async function runCode() {
     } catch (e) { out.innerText = "Error: " + e.message; }
 }
 
-function updateSidebar() {
+async function updateSidebar() {
     const list = document.getElementById('saved-files-list');
     list.innerHTML = "";
     
-    // Safely retrieves user assets using your official storage layout API
-    const userFiles = USW_DATA.getAllUserFiles(currentUser);
+    const userFiles = await USW_DATA.getAllUserFiles(currentUser);
     
     if (userFiles.length === 0) {
         list.innerHTML = `<div style="font-size: 0.75rem; color: #626a7a; padding: 0.5rem 0.8rem; font-style: italic;">No recent projects</div>`;
         return;
     }
 
-    // Grouping our files by workspace profiles (HTML, JavaScript, Python)
     const groups = {
-        'html': { title: '🗁 HTML / CSS Workspace', files: [] },
-        'javascript': { title: '🗁 JS Workspace', files: [] },
-        'python': { title: '🗁 Python 3 Workspace', files: [] }
+        'html': { title: '浴 HTML / CSS Workspace', files: [] },
+        'javascript': { title: '浴 JS Workspace', files: [] },
+        'python': { title: '浴 Python 3 Workspace', files: [] }
     };
 
     userFiles.forEach(file => {
@@ -139,12 +136,10 @@ function updateSidebar() {
         }
     });
 
-    // Generate nested folder project entries inside your recent files view
     Object.keys(groups).forEach(key => {
         const group = groups[key];
         if (group.files.length === 0) return;
 
-        // Parent Project Container Folder
         const groupFolder = document.createElement('div');
         groupFolder.style.marginBottom = "0.75rem";
         
@@ -156,7 +151,6 @@ function updateSidebar() {
             contents.style.display = contents.style.display === 'none' ? 'block' : 'none';
         };
 
-        // File List Wrap Component
         const folderContents = document.createElement('div');
         folderContents.style.paddingLeft = "1rem";
         folderContents.style.marginTop = "0.25rem";
@@ -165,10 +159,10 @@ function updateSidebar() {
             const fileItem = document.createElement('div');
             fileItem.className = 'saved-item';
             fileItem.style.cssText = "font-size: 0.75rem; padding: 0.4rem 0.6rem; color: #626a7a; border-left: 1px solid rgba(255,255,255,0.05); margin-bottom: 2px;";
-            fileItem.innerText = `📄 ${file.filename}`;
-            fileItem.onclick = (e) => {
+            fileItem.innerText = `塘 ${file.filename}`;
+            fileItem.onclick = async (e) => {
                 e.stopPropagation();
-                launchIDE(file.lang, false, file.id);
+                await launchIDE(file.lang, false, file.id);
             };
             folderContents.appendChild(fileItem);
         });
@@ -179,15 +173,15 @@ function updateSidebar() {
     });
 }
 
-function backToMenu() {
+async function backToMenu() {
     document.getElementById('editor-stage').classList.add('hidden');
     document.getElementById('runtime-controls').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
     document.getElementById('output-stream').innerText = "System ready.";
-    updateSidebar();
+    await updateSidebar();
 }
 
-function deployToGithub() {
+async function deployToGithub() {
     const codeContent = editor.getValue();
     const out = document.getElementById('output-stream');
     
@@ -197,17 +191,13 @@ function deployToGithub() {
     }
 
     if (currentFileId) {
-        // Safely overwrites file code inside database
-        USW_DATA.updateFileCode(currentUser, currentFileId, codeContent);
+        await USW_DATA.updateFileCode(currentUser, currentFileId, codeContent);
     } else {
-        // Capture the brand new ID returned from storage.js and assign it globally!
         const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         const projectTitle = `script_${timestamp.replace(' ','').toLowerCase()}.${activeLang === 'html' ? 'html' : activeLang === 'javascript' ? 'js' : 'py'}`;
-        
-        // FIX: Assign this to currentFileId instead of just letting it float
-        currentFileId = USW_DATA.createFile(currentUser, projectTitle, activeLang, codeContent);
+        currentFileId = await USW_DATA.createFile(currentUser, projectTitle, activeLang, codeContent);
     }
     
-    out.innerText = "Changes saved securely.";
-    updateSidebar();
+    out.innerText = "Changes securely encrypted and saved.";
+    await updateSidebar();
 }
