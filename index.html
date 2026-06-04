@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0c">
+    <meta name="theme-color" content="#050507">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>USW</title>
+    <title>USW Engine</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-512.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -21,44 +21,55 @@
     <div class="auth-card">
         <div class="auth-header">
             <h1>Welcome to USW</h1>
-            <p class="auth-subtitle">Sign in to access your workspace</p>
+            <p class="auth-subtitle">Unlock your sandboxed workspace array</p>
         </div>
         
         <div class="input-group">
-            <input type="text" id="username" placeholder="Username or Email" autocomplete="off">
-            <input type="password" id="password" placeholder="Password">
+            <input type="text" id="username" placeholder="Identifier" autocomplete="off">
+            <input type="password" id="password" placeholder="Cryptographic Key Signature">
         </div>
 
         <div class="auth-buttons">
-            <button onclick="handleAuth('login')">Sign In</button>
-            <button onclick="handleAuth('signup')" class="secondary">Create Account</button>
+            <button onclick="USW_Core.handleAuth('login')">Unlock Vault</button>
+            <button onclick="USW_Core.handleAuth('signup')" class="secondary">Generate Vault</button>
         </div>
-        <p id="auth-msg" style="color:#ff6b6b; font-size:11px; margin-top:8px; text-align:center; font-family: var(--font-sans); letter-spacing: 0.02em;"></p>
+        <p id="auth-msg"></p>
     </div>
 </div>
 
 <header class="aether-nav">
     <div class="nav-left">
         <div class="brand">USW NETWORK</div>
-        <div id="output-stream" class="terminal-mini">.</div>
+        <div id="output-stream" class="terminal-mini">System initialization standby.</div>
     </div>
     <div id="runtime-controls" class="hidden">
-        <button class="action-btn" onclick="runCode()">Run Code</button>
-        <button class="action-btn" onclick="deployToGithub()">Save Changes</button>
-        <button class="close-icon" onclick="backToMenu()">✕</button>
+        <button class="action-btn primary" onclick="USW_Core.executeCodePipeline()">Run Execution</button>
+        <button class="action-btn" onclick="USW_Core.commitWorkspaceData()">Commit Changes</button>
+        <button class="close-icon" onclick="USW_Core.exitStudioContext()">✕</button>
     </div>
 </header>
 
 <main id="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-label">RECENT PROJECTS</div>
+        <div class="sidebar-label">WORKSPACE ENGINE FILES</div>
         <div id="saved-files-list"></div>
     </aside>
     <div class="list-container">
-        <div class="list-header">START A NEW WORKSPACE</div>
-        <div class="list-item" onclick="launchIDE('html', true)"><span class="title">HTML / CSS</span></div>
-        <div class="list-item" onclick="launchIDE('javascript', true)"><span class="title">JavaScript</span></div>
-        <div class="list-item" onclick="launchIDE('python', true)"><span class="title">Python 3</span></div>
+        <div class="list-header">INITIALIZE NEW ENGINE RUNTIME</div>
+        <div class="workspace-grid">
+            <div class="list-item" onclick="USW_Core.launchIDE('html', true)">
+                <span class="title">浴 HTML5 Visual Canvas</span>
+                <span class="desc">Render rich DOM layout compositions and interface trees inside clean runtime spaces.</span>
+            </div>
+            <div class="list-item" onclick="USW_Core.launchIDE('javascript', true)">
+                <span class="title">浴 ECMAScript Node Sandbox</span>
+                <span class="desc">Compile logical functions, asynchronous calculations, and variable metrics natively.</span>
+            </div>
+            <div class="list-item" onclick="USW_Core.launchIDE('python', true)">
+                <span class="title">浴 Python 3 WebAssembly</span>
+                <span class="desc">Process analytical vectors, operations, and algorithmic streams via client sandboxes.</span>
+            </div>
+        </div>
     </div>
 </main>
 
