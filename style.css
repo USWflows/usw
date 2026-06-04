@@ -1,14 +1,14 @@
-/* --- USW SYSTEM DESEIGN KERNEL v12.0 --- */
+/* --- USW SYSTEM DESIGN KERNEL v12.0 --- */
 :root {
     --bg-base: #050507;
-    --bg-surface: rgba(13, 13, 18, 0.7);
-    --bg-surface-elevated: rgba(22, 22, 30, 0.85);
-    --border-subtle: rgba(255, 255, 255, 0.03);
+    --bg-surface: rgba(16, 16, 24, 0.55);
+    --bg-surface-elevated: rgba(26, 26, 36, 0.8);
+    --border-subtle: rgba(255, 255, 255, 0.04);
     --border-glow: rgba(57, 227, 147, 0.15);
     --accent: #39e393;
     --accent-glow: rgba(57, 227, 147, 0.3);
     --text-primary: #f1f5f9;
-    --text-muted: #64748b;
+    --text-muted: #626a7a;
     --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
@@ -25,8 +25,8 @@
 body {
     background-color: var(--bg-base);
     background-image: 
-        radial-gradient(circle at 90% 10%, rgba(57, 227, 147, 0.03) 0%, transparent 40%),
-        radial-gradient(circle at 10% 90%, rgba(30, 41, 59, 0.4) 0%, transparent 50%);
+        radial-gradient(circle at 80% 15%, rgba(57, 227, 147, 0.02) 0%, transparent 40%),
+        radial-gradient(circle at 15% 85%, rgba(30, 41, 59, 0.3) 0%, transparent 50%);
     background-attachment: fixed;
     color: var(--text-primary);
     height: 100vh;
@@ -35,7 +35,7 @@ body {
     flex-direction: column;
 }
 
-/* --- TOP INTEGRATED CONTROL DECK --- */
+/* --- INTEGRATED CONTROL DECK NAVIGATION --- */
 .aether-nav {
     height: 56px;
     background: linear-gradient(to bottom, #09090c, var(--bg-base));
@@ -65,17 +65,17 @@ body {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--accent);
-    background: rgba(57, 227, 147, 0.05);
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    border: 1px solid rgba(57, 227, 147, 0.1);
+    background: rgba(57, 227, 147, 0.04);
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    border: 1px solid rgba(57, 227, 147, 0.08);
     max-width: 400px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.nav-right-actions {
+#runtime-controls {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -85,7 +85,6 @@ body {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     color: var(--text-primary);
-    font-family: var(--font-sans);
     font-size: 0.75rem;
     font-weight: 500;
     padding: 0.5rem 1rem;
@@ -124,11 +123,12 @@ body {
     cursor: pointer;
     padding: 0.5rem;
     transition: color 0.2s;
+    margin-left: 0.5rem;
 }
 
 .close-icon:hover { color: #ff6b6b; }
 
-/* --- CORE MAIN WORKSPACE SPLITS --- */
+/* --- CORE FRAME SYSTEM SPLITS --- */
 #dashboard {
     flex: 1;
     display: flex;
@@ -137,7 +137,7 @@ body {
 
 .sidebar {
     width: 280px;
-    background: #09090c;
+    background: #08080b;
     border-right: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
@@ -158,7 +158,7 @@ body {
     overflow-y: auto;
 }
 
-/* --- DIRECTORY FOLDERS & HOVER INTERACTIONS --- */
+/* --- DIRECTORY FOLDERS & DYNAMIC HOVER CONTROLS --- */
 .folder-group { margin-bottom: 1rem; }
 
 .folder-header {
@@ -179,14 +179,14 @@ body {
 .folder-contents {
     padding-left: 0.75rem;
     margin-top: 0.25rem;
-    border-left: 1px solid rgba(255, 255, 255, 0.03);
+    border-left: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .saved-item {
     font-size: 0.75rem;
-    padding: 0.45rem 0.6rem;
+    padding: 0.5rem 0.6rem;
     color: var(--text-muted);
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 2px;
     cursor: pointer;
     display: flex;
@@ -208,12 +208,13 @@ body {
     cursor: pointer;
     font-size: 0.7rem;
     transition: color 0.2s, opacity 0.2s;
+    padding: 2px 6px;
 }
 
 .saved-item:hover .delete-node-btn { opacity: 1; }
 .saved-item .delete-node-btn:hover { color: #ff6b6b; }
 
-/* --- GRID PLATFORM ENGINE HUB --- */
+/* --- RUNTIME ENGINE GRID CHASSIS --- */
 .list-container {
     flex: 1;
     padding: 3rem;
@@ -221,13 +222,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    max-width: 900px;
+    max-width: 960px;
     margin: 0 auto;
     justify-content: center;
 }
 
 .list-header {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.25em;
     color: var(--text-muted);
@@ -236,19 +237,19 @@ body {
 
 .workspace-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
 }
 
 .list-item {
-    background: var(--bg-surface);
+    background: rgba(13, 13, 18, 0.4);
     border: 1px solid var(--border-subtle);
     padding: 2rem;
     border-radius: 12px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(var(--blur-strength));
+    backdrop-filter: blur(16px);
     transition: all 0.4s var(--ease-fluid);
 }
 
@@ -256,7 +257,7 @@ body {
     background: var(--bg-surface-elevated);
     border-color: rgba(57, 227, 147, 0.2);
     transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(57, 227, 147, 0.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 25px rgba(57, 227, 147, 0.01);
 }
 
 .list-item::before {
@@ -271,7 +272,7 @@ body {
 .list-item:hover::before { transform: translateX(100%); }
 
 .list-item .title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: 0.02em;
     color: var(--text-primary);
@@ -282,10 +283,10 @@ body {
 .list-item .desc {
     font-size: 0.75rem;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
-/* --- LUXURY IDE STUDIO SPLIT SCREEN --- */
+/* --- MONACO STUDIO SCREEN GRID --- */
 #editor-stage {
     flex: 1;
     display: flex;
@@ -298,7 +299,7 @@ body {
     height: 100%;
 }
 
-/* --- THE AUTH SYSTEM CANVAS --- */
+/* --- THE CRYPTO AUTH LAYER VISUALS --- */
 #auth-overlay {
     position: fixed;
     inset: 0;
@@ -307,11 +308,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
 }
 
 .auth-card {
-    background: rgba(11, 11, 14, 0.8);
+    background: rgba(10, 10, 14, 0.85);
     border: 1px solid var(--border-subtle);
     padding: 3rem;
     border-radius: 16px;
@@ -320,13 +321,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.7);
 }
 
 .auth-header h1 {
     font-size: 1.25rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     text-align: center;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
@@ -338,6 +339,12 @@ body {
     text-align: center;
 }
 
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
 .auth-card input {
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-subtle);
@@ -347,13 +354,13 @@ body {
     font-family: var(--font-mono);
     font-size: 0.8rem;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s var(--ease-fluid);
 }
 
 .auth-card input:focus {
-    border-color: rgba(57, 227, 147, 0.4);
-    background: rgba(0, 0, 0, 0.6);
-    box-shadow: 0 0 15px rgba(57, 227, 147, 0.05);
+    border-color: rgba(57, 227, 147, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 15px rgba(57, 227, 147, 0.03);
 }
 
 .auth-buttons {
@@ -368,19 +375,38 @@ body {
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
+    border: none;
+    background: var(--text-primary);
+    color: var(--bg-base);
     transition: all 0.2s;
+}
+
+.auth-buttons button:hover {
+    background: #ffffff;
+    transform: translateY(-1px);
+}
+
+.auth-buttons button.secondary {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+}
+
+.auth-buttons button.secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 #auth-msg {
     font-size: 0.75rem;
     text-align: center;
     min-height: 18px;
+    font-family: var(--font-sans);
 }
 
-/* Scrollbar Engineering */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* Webkit Scrollbar Engineering overrides */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.12); }
 
 .hidden { display: none !important; }
