@@ -27,31 +27,34 @@ require(['vs/editor/editor.main'], function() {
     });
 });
 
-function handleAuth(type) {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    const msg = document.getElementById('auth-msg');
+// Mark the function as async so it can wait for the cryptographic hashing
+async function handleAuth(type) { // 
+    const u = document.getElementById('username').value; // 
+    const p = document.getElementById('password').value; // 
+    const msg = document.getElementById('auth-msg'); // 
+    
     if (type === 'signup') {
-        if(USW_DATA.saveUser(u, p)) {
-            msg.style.color = "#39e393";
-            msg.innerText = "Account created successfully! Please sign in.";
+        // Added 'await' here
+        if (await USW_DATA.saveUser(u, p)) { // 
+            msg.style.color = "#39e393"; // 
+            msg.innerText = "Account created successfully! Please sign in."; // 
         } else {
-            msg.style.color = "#ff6b6b";
-            msg.innerText = "This username is already taken.";
+            msg.style.color = "#ff6b6b"; // 
+            msg.innerText = "This username is already taken."; // 
         }
     } else {
-        if (USW_DATA.verifyUser(u, p)) {
-            currentUser = u;
-            sessionStorage.setItem('usw_user', u);
-            document.getElementById('auth-overlay').classList.add('hidden');
-            updateSidebar();
+        // Added 'await' here
+        if (await USW_DATA.verifyUser(u, p)) { // 
+            currentUser = u; // 
+            sessionStorage.setItem('usw_user', u); // 
+            document.getElementById('auth-overlay').classList.add('hidden'); // 
+            updateSidebar(); // 
         } else {
-            msg.style.color = "#ff6b6b";
-            msg.innerText = "Incorrect username or password.";
+            msg.style.color = "#ff6b6b"; // 
+            msg.innerText = "Incorrect username or password."; // 
         }
     }
 }
-
 async function launchIDE(lang, isNew, fileId = null) {
     activeLang = lang;
     document.getElementById('dashboard').classList.add('hidden');
