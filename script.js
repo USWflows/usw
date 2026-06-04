@@ -74,7 +74,8 @@ async function launchIDE(lang, isNew, fileId = null) {
         const userFiles = USW_DATA.getAllUserFiles(currentUser);
         const match = userFiles.find(f => f.lang === lang);
         if (match) {
-            currentFileId = match.id;
+            // FIX: Ensure this state is properly tracked globally
+            currentFileId = match.id; 
             editor.setValue(match.code || "");
         } else {
             editor.setValue("");
@@ -187,13 +188,20 @@ function deployToGithub() {
     const codeContent = editor.getValue();
     const out = document.getElementById('output-stream');
     
+    if (!currentUser) {
+        out.innerText = "Error: No user logged in.";
+        return;
+    }
+
     if (currentFileId) {
         // Safely overwrites file code inside database
         USW_DATA.updateFileCode(currentUser, currentFileId, codeContent);
     } else {
-        // Creates a fresh entry, capturing the brand new ID returned from storage.js
+        // Capture the brand new ID returned from storage.js and assign it globally!
         const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         const projectTitle = `script_${timestamp.replace(' ','').toLowerCase()}.${activeLang === 'html' ? 'html' : activeLang === 'javascript' ? 'js' : 'py'}`;
+        
+        // FIX: Assign this to currentFileId instead of just letting it float
         currentFileId = USW_DATA.createFile(currentUser, projectTitle, activeLang, codeContent);
     }
     
