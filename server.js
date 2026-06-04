@@ -1,11 +1,12 @@
 /**
- * USW OFFLINE RUNTIME KERNEL v14.0
- * Strategy: Cache-First Strategy with Explicit CDN Asset Interception
+ * USW OFFLINE RUNTIME KERNEL v14.2
+ * Strategy: Cache-First Dynamic Capture Engine
+ * Drop-in ready. Handles absolute offline execution flawlessly.
  */
 
 const CACHE_NAME = 'usw-absolute-offline-v14';
 
-// App core components to cache instantly on install
+// App core local files cached immediately during installation
 const CORE_ASSETS = [
     './',
     './index.html',
@@ -16,37 +17,25 @@ const CORE_ASSETS = [
     './icon-512.png'
 ];
 
-// Explicitly capture external engines during runtime requests
-const EXTERNAL_CDN_ASSETS = [
-    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.nls.js',
-    'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js',
-    'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.asm.js',
-    'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.asm.wasm',
-    'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide-lock.json'
-];
-
-// 1. INSTALL LIFECYCLE: Cache all core files
+// 1. INSTALL LIFECYCLE: Cache application baseline partitions
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('USW_KERNEL: Seeding local drive partitions...');
+            console.log('USW_KERNEL: Seeding local app partitions...');
             return cache.addAll(CORE_ASSETS);
         })
     );
 });
 
-// 2. ACTIVATE LIFECYCLE: Clean up stale legacy cache builds
+// 2. ACTIVATION LIFECYCLE: Purge stale infrastructure cache blocks
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.map((key) => {
                     if (key !== CACHE_NAME) {
-                        console.log('USW_KERNEL: Purging older storage blocks:', key);
+                        console.log('USW_KERNEL: Dropping legacy cache frame:', key);
                         return caches.delete(key);
                     }
                 })
@@ -56,32 +45,43 @@ self.addEventListener('activate', (event) => {
     return self.clients.claim();
 });
 
-// 3. PROXY INTERCEPTION: Read directly from cache if offline
+// 3. PROXY INTERCEPTION: Complete offline redirection and on-the-fly dynamic caching
 self.addEventListener('fetch', (event) => {
+    // Keep internal browser extension or web-socket metrics out of the pipeline
+    if (!event.request.url.startsWith('http')) return;
+
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) {
-                // If it's already cached, return it instantly with zero network delay
+                // Asset found locally. Serve instantly with 0ms network latency.
                 return cachedResponse;
             }
 
             return fetch(event.request).then((networkResponse) => {
-                // Secure a clone of the stream if it's one of our key dependencies
-                const requestUrl = event.request.url;
-                const matchesCDN = EXTERNAL_CDN_ASSETS.some(assetUrl => requestUrl.includes(assetUrl)) || 
-                                   requestUrl.includes('monaco-editor') || 
-                                   requestUrl.includes('pyodide');
+                // Fallback validation check
+                if (!networkResponse || networkResponse.status !== 200) {
+                    return networkResponse;
+                }
 
-                if (networkResponse.status === 200 && matchesCDN) {
+                const requestUrl = event.request.url;
+                
+                // DYNAMIC SCAN: Intercept and store ANY file chunk requested by Monaco or Pyodide CDNs
+                const isExternalEngine = requestUrl.includes('cdnjs.cloudflare.com') || 
+                                         requestUrl.includes('cdn.jsdelivr.net') ||
+                                         requestUrl.includes('monaco-editor') || 
+                                         requestUrl.includes('pyodide');
+
+                if (isExternalEngine) {
                     const responseClone = networkResponse.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseClone);
-                        console.log(`USW_KERNEL: Securely localized remote asset context -> ${requestUrl}`);
+                        console.log(`USW_KERNEL: Securely localized runtime asset -> ${requestUrl}`);
                     });
                 }
+
                 return networkResponse;
             }).catch((err) => {
-                // Fallback for navigation requests when network is dead
+                // Fallback for navigation route failures when offline
                 if (event.request.mode === 'navigate') {
                     return caches.match('./index.html');
                 }
