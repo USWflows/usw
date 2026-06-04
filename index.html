@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#050507">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>USW Engine</title>
+    <title>USW Network Studio</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-512.png">
@@ -21,17 +21,17 @@
     <div class="auth-card">
         <div class="auth-header">
             <h1>Welcome to USW</h1>
-            <p class="auth-subtitle">Unlock your sandboxed workspace array</p>
+            <p class="auth-subtitle">Unlock your local sandboxed workspace database</p>
         </div>
         
         <div class="input-group">
-            <input type="text" id="username" placeholder="Identifier" autocomplete="off">
-            <input type="password" id="password" placeholder="Cryptographic Key Signature">
+            <input type="text" id="username" placeholder="User Identifier Name" autocomplete="off">
+            <input type="password" id="password" placeholder="Secure Password Signature Key">
         </div>
 
         <div class="auth-buttons">
-            <button onclick="USW_Core.handleAuth('login')">Unlock Vault</button>
-            <button onclick="USW_Core.handleAuth('signup')" class="secondary">Generate Vault</button>
+            <button onclick="USW_Core.handleAuth('login')">Unlock Vault Array</button>
+            <button onclick="USW_Core.handleAuth('signup')" class="secondary">Generate Vault Array</button>
         </div>
         <p id="auth-msg"></p>
     </div>
@@ -40,7 +40,7 @@
 <header class="aether-nav">
     <div class="nav-left">
         <div class="brand">USW NETWORK</div>
-        <div id="output-stream" class="terminal-mini">System initialization standby.</div>
+        <div id="output-stream" class="terminal-mini">System micro-kernel booting...</div>
     </div>
     <div id="runtime-controls" class="hidden">
         <button class="action-btn primary" onclick="USW_Core.executeCodePipeline()">Run Execution</button>
@@ -51,23 +51,23 @@
 
 <main id="dashboard">
     <aside class="sidebar">
-        <div class="sidebar-label">WORKSPACE ENGINE FILES</div>
+        <div class="sidebar-label">WORKSPACE SECURE ENTITIES</div>
         <div id="saved-files-list"></div>
     </aside>
     <div class="list-container">
-        <div class="list-header">INITIALIZE NEW ENGINE RUNTIME</div>
+        <div class="list-header">INITIALIZE CLIENT WORKSPACE ENGINE</div>
         <div class="workspace-grid">
             <div class="list-item" onclick="USW_Core.launchIDE('html', true)">
-                <span class="title">浴 HTML5 Visual Canvas</span>
-                <span class="desc">Render rich DOM layout compositions and interface trees inside clean runtime spaces.</span>
+                <span class="title">浴 HTML5 Document Visual Canvas</span>
+                <span class="desc">Render interactive UI web layers, layout styles, and elements cleanly inside sandboxed views.</span>
             </div>
             <div class="list-item" onclick="USW_Core.launchIDE('javascript', true)">
-                <span class="title">浴 ECMAScript Node Sandbox</span>
-                <span class="desc">Compile logical functions, asynchronous calculations, and variable metrics natively.</span>
+                <span class="title">浴 ECMAScript Programmatic Node</span>
+                <span class="desc">Compile complex functions, functional loops, metrics, and application calculations natively.</span>
             </div>
             <div class="list-item" onclick="USW_Core.launchIDE('python', true)">
-                <span class="title">浴 Python 3 WebAssembly</span>
-                <span class="desc">Process analytical vectors, operations, and algorithmic streams via client sandboxes.</span>
+                <span class="title">浴 Python 3 WebAssembly Node</span>
+                <span class="desc">Isolate analytical vectors, execution threads, and array operations inside client execution frames.</span>
             </div>
         </div>
     </div>
