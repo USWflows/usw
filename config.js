@@ -3,7 +3,7 @@ const USW_CONFIG = {
     VERSION: "2.1.0",
     STATUS: "Stable",
     GITHUB: {
-        USER: "randmyles2-maker",
+        USER: "USWflows",
         REPO: "usw"
     },
     // Starter templates for the editor
